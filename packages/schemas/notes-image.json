@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sqotion://schemas/notes-image.json",
+  "title": "Notes Image Batch Message",
+  "description": "Message published by the Telegram bot to the 'notes.images' queue when a user sends one or more images. Consumed by the pipeline-worker.",
+  "type": "object",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "Unique batch identifier for correlating the request with the result"
+    },
+    "chat_id": {
+      "type": "integer",
+      "description": "Telegram chat ID where the image was sent"
+    },
+    "message_id": {
+      "type": "integer",
+      "description": "Original Telegram message ID"
+    },
+    "file_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Telegram file_ids to fetch the image content"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Optional caption text attached to the images"
+    }
+  },
+  "required": ["batch_id", "chat_id", "message_id", "file_ids"],
+  "additionalProperties": false
+}

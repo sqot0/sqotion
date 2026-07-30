@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sqotion://schemas/notes-result.json",
+  "title": "Notes Result Message",
+  "description": "Message published by the pipeline-worker to the 'notes.results' queue after processing is complete. Consumed by the Telegram bot.",
+  "type": "object",
+  "properties": {
+    "batch_id": {
+      "type": "string",
+      "description": "Correlates back to the original ImageBatchMessage"
+    },
+    "chat_id": {
+      "type": "integer",
+      "description": "Telegram chat ID to reply to"
+    },
+    "message_id": {
+      "type": "integer",
+      "description": "Original Telegram message ID to reply to"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["completed", "failed"],
+      "description": "Processing status"
+    },
+    "text": {
+      "type": "string",
+      "description": "Generated study notes text (empty on failure)"
+    }
+  },
+  "required": ["batch_id", "chat_id", "message_id", "status"],
+  "additionalProperties": false
+}
