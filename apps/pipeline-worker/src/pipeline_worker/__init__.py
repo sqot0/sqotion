@@ -2,16 +2,14 @@ import json
 
 from pika import BlockingConnection
 
+from pipeline_worker.ai.gemini import call as call_gemini
 from pipeline_worker.config import load
-from pipeline_worker.gemini import call as call_gemini
 from pipeline_worker.rmq import declare_topology, publish_result
 from pipeline_worker.storage import save_note
 from pipeline_worker.telegram import fetch_file_url
 
 
-def process_batch(
-    ch, method, properties, body, bot_token, api_key, model, s3_bucket
-):
+def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bucket):
     print(">>> process_batch called", flush=True)
     data = json.loads(body)
 

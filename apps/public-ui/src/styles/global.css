@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+.note-body {
+  line-height: 1.75;
+}
+
+.note-body h1,
+.note-body h2,
+.note-body h3,
+.note-body h4,
+.note-body h5,
+.note-body h6 {
+  margin: 1.75rem 0 0.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.note-body h1 {
+  font-size: 1.5rem;
+}
+
+.note-body h2 {
+  font-size: 1.3rem;
+}
+
+.note-body h3 {
+  font-size: 1.15rem;
+}
+
+.note-body h4 {
+  font-size: 1.05rem;
+}
+
+.note-body p {
+  margin: 1rem 0;
+}
+
+.note-body a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.note-body ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  list-style: disc;
+}
+
+.note-body ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  list-style: decimal;
+}
+
+.note-body li {
+  margin: 0.25rem 0;
+}
+
+.note-body li > ul,
+.note-body li > ol {
+  margin: 0.25rem 0;
+}
+
+.note-body blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid rgb(0 0 0 / 0.2);
+  color: rgb(0 0 0 / 0.6);
+}
+
+.note-body pre {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  background: #f4f4f5;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.note-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.note-body :not(pre) > code {
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  background: rgb(0 0 0 / 0.06);
+}
+
+.note-body hr {
+  margin: 2rem 0;
+  border: 0;
+  border-top: 1px solid rgb(0 0 0 / 0.1);
+}
+
+.note-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.note-body table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.note-body th,
+.note-body td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(0 0 0 / 0.1);
+  text-align: left;
+}
+
+.note-body th {
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .note-body blockquote {
+    border-left-color: rgb(255 255 255 / 0.25);
+    color: rgb(255 255 255 / 0.6);
+  }
+
+  .note-body pre {
+    background: #18181b;
+  }
+
+  .note-body :not(pre) > code {
+    background: rgb(255 255 255 / 0.1);
+  }
+
+  .note-body hr {
+    border-top-color: rgb(255 255 255 / 0.15);
+  }
+
+  .note-body th,
+  .note-body td {
+    border-color: rgb(255 255 255 / 0.15);
+  }
+}

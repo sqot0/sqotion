@@ -1,0 +1,42 @@
+---
+import { getNotes } from "../lib/notes";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const notes = (await getNotes()).sort(
+  (a, b) => b.createdDate.getTime() - a.createdDate.getTime(),
+);
+---
+
+<BaseLayout title="Notes" description="All notes">
+	<main class="mx-auto w-full max-w-2xl px-4 py-10">
+		<header class="mb-10">
+			<h1 class="text-3xl font-bold tracking-tight">Notes</h1>
+		</header>
+		{notes.length === 0 ? (
+			<p class="text-neutral-500 dark:text-neutral-400">No notes yet.</p>
+		) : (
+			<ul class="space-y-8">
+				{notes.map((note) => (
+					<li>
+						<a href={`/notes/${note.id}`} class="group block">
+							<h2 class="text-lg font-semibold group-hover:underline">
+								{note.title}
+							</h2>
+							{note.description && (
+								<p class="mt-1 text-neutral-600 dark:text-neutral-400">
+									{note.description}
+								</p>
+							)}
+							<time
+								datetime={note.createdDate.toISOString()}
+								class="mt-2 block text-sm text-neutral-500"
+							>
+								{note.createdDate.toLocaleDateString()}
+							</time>
+						</a>
+					</li>
+				))}
+			</ul>
+		)}
+	</main>
+</BaseLayout>

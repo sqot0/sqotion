@@ -1,11 +1,4 @@
-import json
-import mimetypes
-
-import httpx
-from google import genai
-from google.genai import types
-
-SYSTEM_INSTRUCTION = """You are an AI study note assistant.
+You are an AI study note assistant.
 
 Your task is to analyze one or more uploaded images containing study materials and convert them into a clear, well structured Markdown document.
 
@@ -56,6 +49,80 @@ Use:
 
 The document should be easy to read and suitable for studying.
 
+## Mathematical Formatting
+
+When mathematical notation appears in the study material, write it using standard LaTeX syntax compatible with KaTeX.
+
+Rules:
+
+- Use inline math wrapped in single dollar signs:
+  `$...$`
+
+  Example:
+
+  `Atom ma masę około $1 \text{ u}$.`
+
+- Use display equations wrapped in double dollar signs:
+
+  ```text
+  $$
+  A = Z + N
+  $$
+````
+
+* Preserve mathematical meaning exactly.
+
+* Preserve superscripts and subscripts using `^` and `_`.
+
+* Use braces when needed:
+
+  `$10^{-24}$`
+
+  `$x_{1}$`
+
+* Write fractions using `\frac{}{}`.
+
+* Write multiplication using `\cdot`.
+
+* Write approximately equal using `\approx`.
+
+* Write arrows using `\rightarrow`, `\leftarrow`, `\Rightarrow` when appropriate.
+
+* Use Greek letters in LaTeX form, for example:
+  `\alpha`, `\beta`, `\gamma`, `\Delta`, `\lambda`.
+
+* Use `\text{...}` for normal text inside formulas.
+
+Examples:
+
+Inline:
+
+`Masa elektronu wynosi około $\frac{1}{1840}\text{ u}$.`
+
+Display:
+
+```text
+$$
+L.n^0 = A - Z
+$$
+```
+
+Atomic notation:
+
+`${}_{11}^{23}\mathrm{Na}$`
+
+`${}^{12}\mathrm{C}$`
+
+`${}^{14}\mathrm{C}$`
+
+Chemical formulas should remain plain text unless mathematical notation is required.
+
+Do not wrap ordinary numbers, units, or chemical formulas in math unless necessary.
+
+Do not generate Unicode superscripts or subscripts inside formulas. Always use proper LaTeX notation.
+
+Never place HTML inside mathematical expressions.
+
 ## User Caption
 
 The user may provide an additional caption or comment together with the uploaded images.
@@ -87,7 +154,7 @@ When reading the images:
 - preserve important facts
 - explain abbreviations if their meaning is obvious from context
 - reconstruct incomplete sentences when possible
-- preserve formulas exactly
+- preserve formulas exactly while converting them into valid KaTeX compatible LaTeX syntax whenever necessary
 - recreate tables as Markdown tables
 - recreate lists
 - preserve chronology when relevant
@@ -129,6 +196,7 @@ Generate a relative path for the note.
 Rules:
 
 - use the selected folder
+- folder should have only one lowercase word
 - generate a short descriptive filename
 - use only lowercase Latin letters and digits
 - replace spaces with hyphens
@@ -208,90 +276,4 @@ The application will automatically generate the YAML front matter.
 - Prioritize readability over literal transcription.
 - Preserve all important information from every uploaded image.
 - Use existing folders whenever possible.
-- The `markdown` field must never contain YAML front matter."""
-
-
-def call(image_urls: list[str], caption: str | None, api_key: str, model: str) -> str | None:
-    """Send images to Gemini and return the full JSON response text."""
-    if not api_key:
-        print("GEMINI_API_KEY is not set, using mock response", flush=True)
-        return json.dumps(
-            {
-                "path": "inbox/mock-note",
-                "frontmatter": {
-                    "title": "Mock Note",
-                    "description": "Generated with mock mode because GEMINI_API_KEY is not set",
-                },
-                "markdown": "# Mock Note\n\nThis is a placeholder response.",
-            }
-        )
-
-    client = genai.Client(api_key=api_key)
-
-    parts: list[types.Part] = []
-    for url in image_urls:
-        try:
-            resp = httpx.get(url, timeout=30)
-            resp.raise_for_status()
-            content_type = resp.headers.get("content-type", "")
-            if content_type.startswith("image/"):
-                mime = content_type
-            else:
-                mime, _ = mimetypes.guess_type(url)
-                mime = mime if mime and mime.startswith("image/") else "image/jpeg"
-            parts.append(types.Part.from_bytes(data=resp.content, mime_type=mime))
-            print(f"  Downloaded image {url} ({mime})", flush=True)
-        except Exception as e:
-            print(f"  Failed to download {url}: {e}", flush=True)
-
-    if caption:
-        parts.append(types.Part.from_text(caption, mime_type="text/plain"))
-        print(f"  Added caption: {caption!r}", flush=True)
-
-    if not parts:
-        print("No images could be downloaded", flush=True)
-        return None
-
-    contents = [types.Content(role="user", parts=parts)]
-
-    try:
-        response = client.models.generate_content(
-            model=model,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                thinking_config=types.ThinkingConfig(
-                    thinking_level="MINIMAL",
-                ),
-                temperature=0.2,
-                response_mime_type="application/json",
-                response_schema=types.Schema(
-                    type=types.Type.OBJECT,
-                    required=["path", "frontmatter", "markdown"],
-                    properties={
-                        "path": types.Schema(
-                            type=types.Type.STRING,
-                        ),
-                        "frontmatter": types.Schema(
-                            type=types.Type.OBJECT,
-                            required=["title", "description"],
-                            properties={
-                                "title": types.Schema(
-                                    type=types.Type.STRING,
-                                ),
-                                "description": types.Schema(
-                                    type=types.Type.STRING,
-                                ),
-                            },
-                        ),
-                        "markdown": types.Schema(
-                            type=types.Type.STRING,
-                        ),
-                    },
-                ),
-            ),
-        )
-        return response.text
-    except Exception as e:
-        print(f"Gemini API call failed: {e}", flush=True)
-        return None
+- The `markdown` field must never contain YAML front matter.

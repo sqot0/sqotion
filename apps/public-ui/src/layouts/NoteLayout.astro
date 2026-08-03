@@ -1,0 +1,46 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import "katex/dist/katex.min.css";
+import type { Note } from "../lib/notes";
+
+interface Props {
+  note: Note;
+}
+
+const { note } = Astro.props;
+const { title, description, createdDate, updatedDate, html } = note;
+---
+
+<BaseLayout title={title} description={description}>
+	<main class="mx-auto w-full max-w-2xl px-4 py-10">
+		<a
+			href="/"
+			class="inline-block text-sm text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100"
+		>
+			← All notes
+		</a>
+		<article class="mt-8">
+			<header class="border-b border-neutral-200 pb-6 dark:border-neutral-800">
+				<h1 class="text-3xl font-bold tracking-tight">{title}</h1>
+				{description && (
+					<p class="mt-3 text-neutral-600 dark:text-neutral-400">{description}</p>
+				)}
+				<p class="mt-4 text-sm text-neutral-500">
+					<time datetime={createdDate.toISOString()}>
+						{createdDate.toLocaleDateString()}
+					</time>
+					{updatedDate && (
+						<>
+							{" "}
+							· Updated{" "}
+							<time datetime={updatedDate.toISOString()}>
+								{updatedDate.toLocaleDateString()}
+							</time>
+						</>
+					)}
+				</p>
+			</header>
+			<div class="note-body mt-8" set:html={html} />
+		</article>
+	</main>
+</BaseLayout>
