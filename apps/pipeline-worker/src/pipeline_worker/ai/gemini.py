@@ -62,30 +62,6 @@ def call(image_urls: list[str], caption: str | None, api_key: str, model: str) -
                 ),
                 temperature=0.2,
                 response_mime_type="application/json",
-                response_schema=types.Schema(
-                    type=types.Type.OBJECT,
-                    required=["path", "frontmatter", "markdown"],
-                    properties={
-                        "path": types.Schema(
-                            type=types.Type.STRING,
-                        ),
-                        "frontmatter": types.Schema(
-                            type=types.Type.OBJECT,
-                            required=["title", "description"],
-                            properties={
-                                "title": types.Schema(
-                                    type=types.Type.STRING,
-                                ),
-                                "description": types.Schema(
-                                    type=types.Type.STRING,
-                                ),
-                            },
-                        ),
-                        "markdown": types.Schema(
-                            type=types.Type.STRING,
-                        ),
-                    },
-                ),
             ),
         )
         return response.text
