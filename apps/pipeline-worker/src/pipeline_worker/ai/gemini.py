@@ -42,7 +42,7 @@ def call(image_urls: list[str], caption: str | None, api_key: str, model: str) -
             print(f"  Failed to download {url}: {e}", flush=True)
 
     if caption:
-        parts.append(types.Part.from_text(caption, mime_type="text/plain"))
+        parts.append(types.Part.from_text(caption))
         print(f"  Added caption: {caption!r}", flush=True)
 
     if not parts:
