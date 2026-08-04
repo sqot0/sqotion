@@ -51,77 +51,158 @@ The document should be easy to read and suitable for studying.
 
 ## Mathematical Formatting
 
-When mathematical notation appears in the study material, write it using standard LaTeX syntax compatible with KaTeX.
+When mathematical notation appears in the study material, convert it into valid KaTeX compatible LaTeX.
 
-Rules:
+These rules are mandatory.
 
-- Use inline math wrapped in single dollar signs:
-  `$...$`
+### General
 
-  Example:
+- Every LaTeX command MUST start with a backslash `\`.
+- Never omit, remove or alter the leading backslash.
+- Never split a LaTeX command across multiple lines.
+- Never insert a newline inside an inline formula.
+- Never insert spaces inside command names.
+- Never escape the backslash unless required by JSON.
+- When generating JSON, output valid JSON strings. The resulting Markdown must contain valid LaTeX.
 
-  `Atom ma masę około $1 \text{ u}$.`
+Correct:
 
-- Use display equations wrapped in double dollar signs:
+$A \rightarrow T$
 
-  ```text
-  $$
-  A = Z + N
-  $$
-````
+Incorrect:
 
-* Preserve mathematical meaning exactly.
+$A
+\rightarrow T$
 
-* Preserve superscripts and subscripts using `^` and `_`.
+Incorrect:
 
-* Use braces when needed:
+$A
+ightarrow T$
 
-  `$10^{-24}$`
+Incorrect:
 
-  `$x_{1}$`
+$A → T$
 
-* Write fractions using `\frac{}{}`.
+### Inline math
 
-* Write multiplication using `\cdot`.
+Use single dollar signs.
 
-* Write approximately equal using `\approx`.
+Example:
 
-* Write arrows using `\rightarrow`, `\leftarrow`, `\Rightarrow` when appropriate.
+`Atom ma masę około $1\text{ u}$.`
 
-* Use Greek letters in LaTeX form, for example:
-  `\alpha`, `\beta`, `\gamma`, `\Delta`, `\lambda`.
+### Display equations
 
-* Use `\text{...}` for normal text inside formulas.
+Use double dollar signs.
+
+Example:
+
+$$
+E = mc^2
+$$
+
+### Commands
+
+Always use standard LaTeX commands.
 
 Examples:
 
-Inline:
+- `\rightarrow`
+- `\leftarrow`
+- `\Rightarrow`
+- `\approx`
+- `\cdot`
+- `\times`
+- `\le`
+- `\ge`
+- `\neq`
+- `\in`
+- `\subset`
 
-`Masa elektronu wynosi około $\frac{1}{1840}\text{ u}$.`
+Never replace these commands with incomplete text.
 
-Display:
+### Fractions
 
-```text
-$$
-L.n^0 = A - Z
-$$
-```
+Use:
 
-Atomic notation:
+`\frac{a}{b}`
 
-`${}_{11}^{23}\mathrm{Na}$`
+Never use plain text alternatives.
 
-`${}^{12}\mathrm{C}$`
+### Powers and indices
+
+Use:
+
+`x^2`
+
+`x_{1}`
+
+`10^{-24}`
+
+Always use braces for multi character superscripts or subscripts.
+
+### Greek letters
+
+Always use LaTeX commands.
+
+Examples:
+
+`\alpha`
+
+`\beta`
+
+`\gamma`
+
+`\Delta`
+
+`\lambda`
+
+Never use Unicode Greek letters inside formulas.
+
+### Text inside formulas
+
+Use:
+
+`\text{...}`
+
+Example:
+
+`$\text{START}$`
+
+### Chemistry
+
+Chemical formulas should remain plain text.
+
+Example:
+
+H₂O
+
+CO₂
+
+NaCl
+
+Only use LaTeX if the original notation is mathematical, for example isotopes:
 
 `${}^{14}\mathrm{C}$`
 
-Chemical formulas should remain plain text unless mathematical notation is required.
+`${}_{11}^{23}\mathrm{Na}$`
 
-Do not wrap ordinary numbers, units, or chemical formulas in math unless necessary.
+### Validation
 
-Do not generate Unicode superscripts or subscripts inside formulas. Always use proper LaTeX notation.
+Before returning the final answer, verify that every inline and display formula satisfies all of the following:
 
-Never place HTML inside mathematical expressions.
+- every LaTeX command starts with `\`
+- no command is missing its first character
+- no formula contains broken commands like `ightarrow`, `lpha`, `rac`, `ext`
+- no inline formula contains line breaks
+- every opening `$` has a matching closing `$`
+- every opening `$$` has a matching closing `$$`
+
+If any formula violates these rules, correct it before producing the final JSON.
+
+Use LaTeX only when mathematical notation is actually required.
+
+Do NOT wrap ordinary text, arrows, lists, biological notation or chemistry in math mode unless they are part of a mathematical expression.
 
 ## User Caption
 
@@ -277,3 +358,5 @@ The application will automatically generate the YAML front matter.
 - Preserve all important information from every uploaded image.
 - Use existing folders whenever possible.
 - The `markdown` field must never contain YAML front matter.
+- Never use Unicode arrows inside mathematical expressions. Always use the corresponding LaTeX command such as `\rightarrow`.
+- Before returning the JSON, perform a final validation pass over every mathematical expression and repair any malformed LaTeX commands.
