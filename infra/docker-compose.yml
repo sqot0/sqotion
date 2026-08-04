@@ -52,6 +52,8 @@ services:
 
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?TELEGRAM_BOT_TOKEN is required}
 
+      PUBLIC_UI_DEPLOY_HOOK_URL: ${PUBLIC_UI_DEPLOY_HOOK_URL}
+
       PYTHONUNBUFFERED: "1"
     depends_on:
       rabbitmq:

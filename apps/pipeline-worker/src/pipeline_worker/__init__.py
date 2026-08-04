@@ -4,12 +4,13 @@ from pika import BlockingConnection
 
 from pipeline_worker.ai.gemini import call as call_gemini
 from pipeline_worker.config import load
+from pipeline_worker.deploy_hook import trigger_deploy
 from pipeline_worker.rmq import declare_topology, publish_result
 from pipeline_worker.storage import save_note
 from pipeline_worker.telegram import fetch_file_url
 
 
-def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bucket):
+def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bucket, deploy_hook_url):
     print(">>> process_batch called", flush=True)
     data = json.loads(body)
 
@@ -54,6 +55,8 @@ def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bu
                 s3_bucket, rel_path, frontmatter, markdown_body, image_urls, file_ids
             )
 
+            trigger_deploy(deploy_hook_url)
+
             title = frontmatter.get("title", "") or rel_path.split("/")[-1]
             formatted = f"Title: {title}\nPath: {rel_path}"
             publish_result(ch, batch_id, chat_id, message_id, formatted)
@@ -66,7 +69,7 @@ def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bu
 
 
 def main():
-    connection_params, api_key, model, bot_token, s3_bucket = load()
+    connection_params, api_key, model, bot_token, s3_bucket, deploy_hook_url = load()
 
     print(
         f"Starting pipeline worker (api_key={'set' if api_key else 'not set'}, "
@@ -81,7 +84,7 @@ def main():
         ch.basic_consume(
             queue="notes.images",
             on_message_callback=lambda ch, method, properties, body: process_batch(
-                ch, method, properties, body, bot_token, api_key, model, s3_bucket
+                ch, method, properties, body, bot_token, api_key, model, s3_bucket, deploy_hook_url
             ),
             auto_ack=True,
         )
