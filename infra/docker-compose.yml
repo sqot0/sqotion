@@ -1,9 +1,9 @@
 services:
   rabbitmq:
     image: rabbitmq:4.3.4-management-alpine
-    ports:
-      - "5672:5672"   # AMQP
-      - "15672:15672" # Management UI
+    # ports:
+    #   - "5672:5672"   # AMQP
+    #   - "15672:15672" # Management UI
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
