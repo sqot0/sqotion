@@ -1,7 +1,25 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+	--font-mono:
+		ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas,
+		"DejaVu Sans Mono", monospace;
+}
+
+/* ---- Reading Progress Bar ---- */
+.reading-progress {
+	@apply fixed top-0 left-0 z-50 h-0.5 bg-neutral-900 dark:bg-white;
+	width: 0%;
+	transition: width 0.1s linear;
+}
+
+/* ---- Note Body (Article) ---- */
 .note-body {
-  line-height: 1.75;
+	line-height: 1.75;
 }
 
 .note-body h1,
@@ -10,135 +28,207 @@
 .note-body h4,
 .note-body h5,
 .note-body h6 {
-  margin: 1.75rem 0 0.5rem;
-  font-weight: 700;
-  line-height: 1.3;
+	margin: 2rem 0 0.75rem;
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.02em;
+	scroll-margin-top: 5rem;
 }
 
 .note-body h1 {
-  font-size: 1.5rem;
+	font-size: 1.75rem;
 }
-
 .note-body h2 {
-  font-size: 1.3rem;
+	font-size: 1.4rem;
+	padding-bottom: 0.4rem;
+	border-bottom: 1px solid var(--color-neutral-200);
 }
-
+:is(.dark) .note-body h2 {
+	border-bottom-color: var(--color-neutral-800);
+}
 .note-body h3 {
-  font-size: 1.15rem;
+	font-size: 1.15rem;
 }
-
 .note-body h4 {
-  font-size: 1.05rem;
+	font-size: 1.05rem;
 }
 
 .note-body p {
-  margin: 1rem 0;
+	margin: 1rem 0;
 }
 
 .note-body a {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	color: inherit;
+}
+
+.note-body ul,
+.note-body ol {
+	margin: 1rem 0;
+	padding-left: 1.5rem;
 }
 
 .note-body ul {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-  list-style: disc;
+	list-style: disc;
 }
-
 .note-body ol {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-  list-style: decimal;
+	list-style: decimal;
 }
 
 .note-body li {
-  margin: 0.25rem 0;
+	margin: 0.25rem 0;
 }
 
 .note-body li > ul,
 .note-body li > ol {
-  margin: 0.25rem 0;
+	margin: 0.25rem 0;
 }
 
 .note-body blockquote {
-  margin: 1.5rem 0;
-  padding-left: 1rem;
-  border-left: 3px solid rgb(0 0 0 / 0.2);
-  color: rgb(0 0 0 / 0.6);
+	margin: 1.5rem 0;
+	padding: 0.5rem 1rem;
+	border-left: 2px solid var(--color-neutral-300);
+	color: var(--color-neutral-600);
+	font-style: italic;
+}
+:is(.dark) .note-body blockquote {
+	border-left-color: var(--color-neutral-700);
+	color: var(--color-neutral-400);
 }
 
+/* ---- Code ---- */
 .note-body pre {
-  margin: 1.5rem 0;
-  padding: 1rem;
-  overflow-x: auto;
-  border-radius: 0.5rem;
-  background: #f4f4f5;
-  font-size: 0.875rem;
-  line-height: 1.6;
+	margin: 1.5rem 0;
+	border-radius: 0.5rem;
+	overflow-x: auto;
+	border: 1px solid var(--color-neutral-200);
+	position: relative;
+}
+:is(.dark) .note-body pre {
+	border-color: var(--color-neutral-800);
 }
 
-.note-body code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.9em;
+.note-body pre code {
+	display: block;
+	padding: 1rem;
+	font-size: 0.875rem;
+	line-height: 1.65;
+	font-family: var(--font-mono);
 }
 
 .note-body :not(pre) > code {
-  padding: 0.15rem 0.35rem;
-  border-radius: 0.25rem;
-  background: rgb(0 0 0 / 0.06);
+	padding: 0.15rem 0.35rem;
+	border-radius: 0.25rem;
+	background: var(--color-neutral-100);
+	font-family: var(--font-mono);
+	font-size: 0.875em;
+}
+:is(.dark) .note-body :not(pre) > code {
+	background: var(--color-neutral-800);
 }
 
 .note-body hr {
-  margin: 2rem 0;
-  border: 0;
-  border-top: 1px solid rgb(0 0 0 / 0.1);
+	margin: 2.5rem 0;
+	border: 0;
+	border-top: 1px solid var(--color-neutral-200);
+}
+:is(.dark) .note-body hr {
+	border-top-color: var(--color-neutral-800);
 }
 
 .note-body img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
+	max-width: 100%;
+	height: auto;
+	border-radius: 0.5rem;
+	cursor: zoom-in;
 }
 
 .note-body table {
-  width: 100%;
-  margin: 1.5rem 0;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+	width: 100%;
+	margin: 1.5rem 0;
+	border-collapse: collapse;
+	font-size: 0.875rem;
+	overflow-x: auto;
+	display: block;
+}
+@media (min-width: 640px) {
+	.note-body table {
+		display: table;
+	}
 }
 
 .note-body th,
 .note-body td {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid rgb(0 0 0 / 0.1);
-  text-align: left;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--color-neutral-200);
+	text-align: left;
+}
+:is(.dark) .note-body th,
+:is(.dark) .note-body td {
+	border-color: var(--color-neutral-800);
 }
 
 .note-body th {
-  font-weight: 600;
+	font-weight: 600;
+	background: var(--color-neutral-50);
+}
+:is(.dark) .note-body th {
+	background: var(--color-neutral-900);
 }
 
-@media (prefers-color-scheme: dark) {
-  .note-body blockquote {
-    border-left-color: rgb(255 255 255 / 0.25);
-    color: rgb(255 255 255 / 0.6);
-  }
+/* ---- Katex ---- */
+.note-body .katex {
+	font-size: 1.1em;
+}
 
-  .note-body pre {
-    background: #18181b;
-  }
+/* ---- Medium Zoom ---- */
+.medium-zoom-overlay {
+	background: rgba(0, 0, 0, 0.8) !important;
+	backdrop-filter: blur(4px);
+}
+:is(.dark) .medium-zoom-overlay {
+	background: rgba(0, 0, 0, 0.9) !important;
+}
 
-  .note-body :not(pre) > code {
-    background: rgb(255 255 255 / 0.1);
-  }
+/* ---- TOC active link ---- */
+.toc-link-active {
+	color: var(--color-neutral-900);
+	font-weight: 500;
+}
+:is(.dark) .toc-link-active {
+	color: white;
+}
 
-  .note-body hr {
-    border-top-color: rgb(255 255 255 / 0.15);
-  }
+/* ---- Sidebar active ---- */
+.sidebar-link-active {
+	background: var(--color-neutral-100);
+	color: var(--color-neutral-900);
+	font-weight: 500;
+}
+:is(.dark) .sidebar-link-active {
+	background: var(--color-neutral-800);
+	color: white;
+}
 
-  .note-body th,
-  .note-body td {
-    border-color: rgb(255 255 255 / 0.15);
-  }
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: var(--color-neutral-300);
+	border-radius: 3px;
+}
+:is(.dark) ::-webkit-scrollbar-thumb {
+	background: var(--color-neutral-700);
+}
+
+/* ---- Drawer backdrop ---- */
+.drawer-backdrop {
+	background: rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(2px);
 }

@@ -1,42 +1,131 @@
 ---
-import { getNotes } from "../lib/notes";
-import BaseLayout from "../layouts/BaseLayout.astro";
+import { getNotes, buildSubjectTree } from "../lib/notes";
+import BaseLayout from "@/layouts/BaseLayout.astro";
 
-const notes = (await getNotes()).sort(
-  (a, b) => b.createdDate.getTime() - a.createdDate.getTime(),
+const notes = await getNotes();
+const tree = buildSubjectTree(notes);
+
+// All notes sorted by created date
+const sortedByDate = notes.sort(
+	(a, b) => b.createdDate.getTime() - a.createdDate.getTime(),
 );
+
+// Recently updated notes (those with an updatedDate)
+const recentlyUpdated = notes
+	.filter((n) => n.updatedDate)
+	.sort(
+		(a, b) =>
+			new Date(b.updatedDate!).getTime() - new Date(a.updatedDate!).getTime(),
+	)
+	.slice(0, 5);
+
+const recentNotes = sortedByDate.slice(0, 5);
 ---
 
-<BaseLayout title="Notes" description="All notes">
-	<main class="mx-auto w-full max-w-2xl px-4 py-10">
-		<header class="mb-10">
-			<h1 class="text-3xl font-bold tracking-tight">Notes</h1>
-		</header>
-		{notes.length === 0 ? (
-			<p class="text-neutral-500 dark:text-neutral-400">No notes yet.</p>
-		) : (
-			<ul class="space-y-8">
-				{notes.map((note) => (
-					<li>
-						<a href={`/notes/${note.id}`} class="group block">
-							<h2 class="text-lg font-semibold group-hover:underline">
-								{note.title}
-							</h2>
-							{note.description && (
-								<p class="mt-1 text-neutral-600 dark:text-neutral-400">
-									{note.description}
-								</p>
-							)}
-							<time
-								datetime={note.createdDate.toISOString()}
-								class="mt-2 block text-sm text-neutral-500"
-							>
-								{note.createdDate.toLocaleDateString()}
-							</time>
-						</a>
-					</li>
-				))}
-			</ul>
-		)}
-	</main>
+<BaseLayout title="Sqotion" description="A personal knowledge base">
+  <main class="mx-auto w-full max-w-3xl px-4 py-16">
+    <!-- Subjects section -->
+    <section>
+      <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+        Subjects
+      </h2>
+      <div class="mt-6 grid gap-4 sm:grid-cols-2">
+        {
+          tree.map((subject) => (
+            <a
+              href={`/${subject.fullPath}`}
+              class="group rounded-lg border border-neutral-200 p-5 transition-colors hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600"
+            >
+              <h3 class="text-lg font-semibold capitalize group-hover:underline">
+                {subject.name}
+              </h3>
+              <p class="mt-1 text-sm text-neutral-500">
+                {subject.noteCount} note{subject.noteCount !== 1 ? "s" : ""}
+              </p>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Recent notes -->
+    {recentNotes.length > 0 && (
+      <section class="mt-16">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          Recent notes
+        </h2>
+        <ul class="mt-6 divide-y divide-neutral-100 dark:divide-neutral-800">
+          {recentNotes.map((note) => (
+            <li>
+              <a
+                href={`/${note.id}`}
+                class="group flex items-center justify-between py-4"
+              >
+                <div>
+                  <h3 class="font-medium group-hover:underline">{note.title}</h3>
+                  {note.description && (
+                    <p class="mt-0.5 text-sm text-neutral-500">
+                      {note.description}
+                    </p>
+                  )}
+                </div>
+                <time
+                  datetime={note.createdDate.toISOString()}
+                  class="shrink-0 text-sm text-neutral-400"
+                >
+                  {note.createdDate.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </time>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {/* Recently updated */}
+    {recentlyUpdated.length > 0 && (
+      <section class="mt-16">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          Recently updated
+        </h2>
+        <ul class="mt-6 divide-y divide-neutral-100 dark:divide-neutral-800">
+          {recentlyUpdated.map((note) => (
+            <li>
+              <a
+                href={`/${note.id}`}
+                class="group flex items-center justify-between py-4"
+              >
+                <div>
+                  <h3 class="font-medium group-hover:underline">{note.title}</h3>
+                  {note.description && (
+                    <p class="mt-0.5 text-sm text-neutral-500">
+                      {note.description}
+                    </p>
+                  )}
+                </div>
+                <time
+                  datetime={new Date(note.updatedDate!).toISOString()}
+                  class="shrink-0 text-sm text-neutral-400"
+                >
+                  {new Date(note.updatedDate!).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </time>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    {tree.length === 0 && (
+      <div class="py-16 text-center">
+        <p class="text-neutral-500">No notes yet.</p>
+      </div>
+    )}
+  </main>
 </BaseLayout>

@@ -1,0 +1,69 @@
+---
+import type { SubjectNode } from "@/lib/notes";
+
+interface Props {
+	node: SubjectNode;
+	depth: number;
+	currentSlug?: string;
+}
+
+const { node, depth, currentSlug } = Astro.props;
+const isActive = currentSlug === node.fullPath;
+const isDescendant = currentSlug?.startsWith(node.fullPath + "/");
+const baseClass =
+	"flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800";
+const paddingClass = "pl-" + (2 + depth * 3).toString();
+---
+
+<div class="group">
+  {node.note ? (
+    <a
+      href={`/${node.fullPath}`}
+      class:list={[baseClass, paddingClass, { "sidebar-link-active": isActive }]}
+    >
+      <span class="truncate capitalize">{node.name}</span>
+    </a>
+  ) : (
+    <button
+      type="button"
+      data-collapse-trigger
+      data-path={node.fullPath}
+      class:list={[baseClass, paddingClass, { "sidebar-link-active": isActive }]}
+    >
+      <!-- Chevron for collapsible sections -->
+      {node.children.length > 0 && (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="shrink-0 text-neutral-400 transition-transform data-open:rotate-90"
+          data-collapse-icon
+          data-path={node.fullPath}
+        >
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      )}
+      <span class="truncate capitalize">{node.name}</span>
+      <span class="ml-auto shrink-0 text-xs text-neutral-400">{node.noteCount}</span>
+    </button>
+  )}
+  {node.children.length > 0 && (
+    <div
+      data-collapse-content
+      data-path={node.fullPath}
+      class:list={[
+        isActive || isDescendant ? "" : "hidden",
+      ]}
+    >
+      {node.children.map((child) => (
+        <Astro.self node={child} depth={depth + 1} currentSlug={currentSlug} />
+      ))}
+    </div>
+  )}
+</div>

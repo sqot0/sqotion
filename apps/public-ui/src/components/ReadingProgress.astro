@@ -1,0 +1,20 @@
+<script>
+  // Reading progress bar
+  window.addEventListener("scroll", () => {
+    const bar = document.getElementById("reading-progress");
+    if (!bar) return;
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = `${Math.min(progress, 100)}%`;
+  });
+</script>
+
+<div
+  id="reading-progress"
+  class="reading-progress"
+  role="progressbar"
+  aria-valuemin={0}
+  aria-valuemax={100}
+  aria-label="Reading progress"
+></div>

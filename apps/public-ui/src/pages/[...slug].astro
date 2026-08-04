@@ -1,0 +1,98 @@
+---
+import { getNotes, getNotesByPath } from "@/lib/notes";
+import type { Note } from "@/lib/notes";
+import NoteLayout from "@/layouts/NoteLayout.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+	const notes = await getNotes();
+	const paths: {
+		params: { slug: string };
+		props:
+			| { kind: "note"; note: Note }
+			| { kind: "folder"; slug: string; childNotes: Note[] };
+	}[] = [];
+
+	for (const note of notes) {
+		paths.push({
+			params: { slug: note.id },
+			props: { kind: "note", note },
+		});
+	}
+
+	// Discover unique folder paths from the flat note ids.
+	const folderSet = new Set<string>();
+	for (const note of notes) {
+		const segments = note.id.split("/").filter(Boolean);
+		for (let i = 1; i < segments.length; i++) {
+			folderSet.add(segments.slice(0, i).join("/"));
+		}
+	}
+
+	for (const folderPath of folderSet) {
+		const childNotes = await getNotesByPath(folderPath);
+		paths.push({
+			params: { slug: folderPath },
+			props: { kind: "folder", slug: folderPath, childNotes },
+		});
+	}
+
+	return paths;
+}
+
+const { note, childNotes, kind, slug } = Astro.props;
+---
+
+{
+  kind === "note" ? (
+    <NoteLayout note={note} />
+  ) : (
+    <BaseLayout
+      title={slug}
+      withSidebar={true}
+      withToc={false}
+      currentSlug={slug}
+    >
+      <main class="mx-auto w-full max-w-3xl px-4 py-16">
+        <h1 class="text-3xl font-semibold capitalize tracking-tight">{slug}</h1>
+        <p class="mt-2 text-sm text-neutral-500">
+          {childNotes.length} note{childNotes.length !== 1 ? "s" : ""}
+        </p>
+
+        <div class="mt-8">
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-neutral-500">
+            Notes
+          </h2>
+          <ul class="mt-4 divide-y divide-neutral-100 dark:divide-neutral-800">
+            {childNotes.map((n) => (
+              <li>
+                <a
+                  href={`/${n.id}`}
+                  class="group flex items-center justify-between py-4"
+                >
+                  <div>
+                    <h3 class="font-medium group-hover:underline">{n.title}</h3>
+                    {n.description && (
+                      <p class="mt-0.5 text-sm text-neutral-500">
+                        {n.description}
+                      </p>
+                    )}
+                  </div>
+                  <time
+                    datetime={n.createdDate.toISOString()}
+                    class="shrink-0 text-sm text-neutral-400"
+                  >
+                    {n.createdDate.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </time>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </main>
+    </BaseLayout>
+  )
+}

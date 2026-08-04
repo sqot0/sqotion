@@ -1,0 +1,19 @@
+<script>
+  // Sidebar collapse toggle
+  document.addEventListener("click", (e) => {
+    const trigger = (e.target as Element).closest("[data-collapse-trigger]");
+    if (!trigger) return;
+    const path = trigger.getAttribute("data-path");
+    if (!path) return;
+
+    const content = document.querySelector(
+      `[data-collapse-content][data-path="${path}"]`,
+    );
+    const icon = document.querySelector(
+      `[data-collapse-icon][data-path="${path}"]`,
+    );
+
+    if (content) content.classList.toggle("hidden");
+    if (icon) icon.toggleAttribute("data-open");
+  });
+</script>

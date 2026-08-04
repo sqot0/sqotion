@@ -1,0 +1,17 @@
+---
+import SubjectTreeNode from "@/components/SubjectTreeNode.astro";
+import type { SubjectNode } from "@/lib/notes";
+
+export interface Props {
+	tree: SubjectNode[];
+	currentSlug?: string;
+}
+
+const { tree, currentSlug } = Astro.props;
+---
+
+<nav class="space-y-0.5" aria-label="Sidebar navigation">
+  {tree.map((node) => (
+    <SubjectTreeNode node={node} depth={0} currentSlug={currentSlug} />
+  ))}
+</nav>
