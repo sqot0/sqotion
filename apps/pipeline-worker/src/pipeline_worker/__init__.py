@@ -5,6 +5,7 @@ from pika import BlockingConnection
 from pipeline_worker.ai.gemini import call as call_gemini
 from pipeline_worker.config import load
 from pipeline_worker.deploy_hook import trigger_deploy
+from pipeline_worker.json_util import extract_json
 from pipeline_worker.rmq import declare_topology, publish_result
 from pipeline_worker.storage import save_note
 from pipeline_worker.telegram import fetch_file_url
@@ -45,24 +46,25 @@ def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bu
 
     if text:
         print(f"Gemini response:\n{text}", flush=True)
-        try:
-            result = json.loads(text)
-            rel_path = result.get("path", "unknown")
-            frontmatter = result.get("frontmatter", {})
-            markdown_body = result.get("markdown", "")
-
-            save_note(
-                s3_bucket, s3_prefix, rel_path, frontmatter, markdown_body, image_urls, file_ids
-            )
-
-            trigger_deploy(deploy_hook_url)
-
-            title = frontmatter.get("title", "") or rel_path.split("/")[-1]
-            formatted = f"Title: {title}\nPath: {rel_path}"
-            publish_result(ch, batch_id, chat_id, message_id, formatted)
-        except json.JSONDecodeError:
+        result = extract_json(text)
+        if result is None:
             print("Failed to parse Gemini response as JSON", flush=True)
             publish_result(ch, batch_id, chat_id, message_id, text)
+            return
+
+        rel_path = result.get("path", "unknown")
+        frontmatter = result.get("frontmatter", {})
+        markdown_body = result.get("markdown", "")
+
+        save_note(
+            s3_bucket, s3_prefix, rel_path, frontmatter, markdown_body, image_urls, file_ids
+        )
+
+        trigger_deploy(deploy_hook_url)
+
+        title = frontmatter.get("title", "") or rel_path.split("/")[-1]
+        formatted = f"Title: {title}\nPath: {rel_path}"
+        publish_result(ch, batch_id, chat_id, message_id, formatted)
     else:
         print("Gemini returned no response", flush=True)
         publish_result(ch, batch_id, chat_id, message_id, None)
