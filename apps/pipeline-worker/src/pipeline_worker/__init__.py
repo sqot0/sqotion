@@ -10,7 +10,7 @@ from pipeline_worker.storage import save_note
 from pipeline_worker.telegram import fetch_file_url
 
 
-def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bucket, deploy_hook_url):
+def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bucket, s3_prefix, deploy_hook_url):
     print(">>> process_batch called", flush=True)
     data = json.loads(body)
 
@@ -52,7 +52,7 @@ def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bu
             markdown_body = result.get("markdown", "")
 
             save_note(
-                s3_bucket, rel_path, frontmatter, markdown_body, image_urls, file_ids
+                s3_bucket, s3_prefix, rel_path, frontmatter, markdown_body, image_urls, file_ids
             )
 
             trigger_deploy(deploy_hook_url)
@@ -69,7 +69,7 @@ def process_batch(ch, method, properties, body, bot_token, api_key, model, s3_bu
 
 
 def main():
-    connection_params, api_key, model, bot_token, s3_bucket, deploy_hook_url = load()
+    connection_params, api_key, model, bot_token, s3_bucket, s3_prefix, deploy_hook_url = load()
 
     print(
         f"Starting pipeline worker (api_key={'set' if api_key else 'not set'}, "
@@ -84,7 +84,7 @@ def main():
         ch.basic_consume(
             queue="notes.images",
             on_message_callback=lambda ch, method, properties, body: process_batch(
-                ch, method, properties, body, bot_token, api_key, model, s3_bucket, deploy_hook_url
+                ch, method, properties, body, bot_token, api_key, model, s3_bucket, s3_prefix, deploy_hook_url
             ),
             auto_ack=True,
         )

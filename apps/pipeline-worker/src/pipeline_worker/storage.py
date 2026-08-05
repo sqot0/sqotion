@@ -17,6 +17,7 @@ def _s3_client():
 
 def save_note(
     bucket: str,
+    prefix: str,
     relative_path: str,
     frontmatter: dict,
     markdown_body: str,
@@ -24,6 +25,8 @@ def save_note(
     file_ids: list[str],
 ) -> str:
     import yaml
+
+    prefix_dir = prefix.strip("/") + "/" if prefix.strip("/") else ""
 
     # Build YAML front matter
     yaml_block = (
@@ -46,7 +49,7 @@ def save_note(
             ext = _guess_ext(url, resp.headers.get("content-type", ""))
             filename = f"{fid}.{ext.split('/')[-1]}"
 
-            img_key = f"assets/{filename}"
+            img_key = f"{prefix_dir}assets/{filename}"
             s3.put_object(Bucket=bucket, Key=img_key, Body=resp.content)
             print(f"  Uploaded attachment: s3://{bucket}/{img_key}", flush=True)
 
@@ -60,7 +63,7 @@ def save_note(
 
     full_content = yaml_block + "\n" + markdown_body + sources
 
-    md_key = relative_path + ".md"
+    md_key = f"{prefix_dir}{relative_path}.md"
     s3.put_object(
         Bucket=bucket,
         Key=md_key,

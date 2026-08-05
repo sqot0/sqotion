@@ -30,6 +30,13 @@ export interface SubjectNode {
 
 const R2_PUBLIC_ASSETS_URL = "https://sqotion-storage.sqot0.my.id";
 
+// Optional storage folder prefix (e.g. "notes") that wraps all keys in the
+// bucket. Notes live at "{prefix}/...". Set via PUBLIC_STORAGE_PREFIX.
+const STORAGE_PREFIX = (
+	import.meta.env.PUBLIC_STORAGE_PREFIX ?? ""
+).replace(/^\/+|\/+$/g, "");
+const STORAGE_PREFIX_DIR = STORAGE_PREFIX ? STORAGE_PREFIX + "/" : "";
+
 const md = new MarkdownIt({
 	html: true,
 });
@@ -105,7 +112,7 @@ async function parseNote(key: string, object: R2ObjectBody): Promise<Note> {
 	const html = md.render(content);
 
 	return {
-		id: key.replace(/\.md$/, ""),
+		id: key.slice(STORAGE_PREFIX_DIR.length).replace(/\.md$/, ""),
 		title: typeof data.title === "string" ? data.title : "",
 		description: typeof data.description === "string" ? data.description : "",
 		createdDate: object.uploaded,
@@ -116,21 +123,25 @@ async function parseNote(key: string, object: R2ObjectBody): Promise<Note> {
 }
 
 function isMdKey(key: string): boolean {
+	const segments = key.slice(STORAGE_PREFIX_DIR.length).split("/");
 	// Ignore the Assets folder entirely.
-	if (key.split("/")[0]?.toLowerCase() === "assets") {
+	if (segments[0]?.toLowerCase() === "assets") {
 		return false;
 	}
 	// A key is a note (file) when any path segment contains a dot,
 	// e.g. "math/algebra.md". Bare folders have no dot segment.
-	return key.split("/").some((segment) => segment.includes("."));
+	return segments.some((segment) => segment.includes("."));
 }
 
-async function listObjects(prefix?: string): Promise<R2ObjectBody[]> {
+async function listObjects(folderPath?: string): Promise<R2ObjectBody[]> {
 	const bodies: R2ObjectBody[] = [];
 	let cursor: string | undefined;
+	const r2Prefix = folderPath
+		? `${STORAGE_PREFIX_DIR}${folderPath.replace(/\/+$/, "")}/`
+		: STORAGE_PREFIX_DIR;
 
 	do {
-		const result = await env.STORAGE.list({ prefix, cursor });
+		const result = await env.STORAGE.list({ prefix: r2Prefix, cursor });
 		bodies.push(
 			...(await Promise.all(
 				result.objects
@@ -162,12 +173,12 @@ export async function getNotes(): Promise<Note[]> {
  */
 export async function getNotesByPath(path: string): Promise<Note[]> {
 	const normalized = path.replace(/\/+$/, "");
-	const bodies = await listObjects(normalized ? `${normalized}/` : undefined);
+	const bodies = await listObjects(normalized || undefined);
 	return Promise.all(bodies.map((body) => parseNote(body.key, body)));
 }
 
 export async function getNote(id: string): Promise<Note | null> {
-	const key = `${id.replace(/\.md$/, "")}.md`;
+	const key = `${STORAGE_PREFIX_DIR}${id.replace(/\.md$/, "")}.md`;
 	const object = await env.STORAGE.get(key);
 	if (!object) {
 		return null;
