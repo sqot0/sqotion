@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"log"
+	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -12,10 +14,13 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	tb "gopkg.in/telebot.v4"
+
+	"sqotion/apps/telegram-bot/internal/config"
 )
 
 type Handler struct {
 	Channel *amqp.Channel
+	Cfg     config.App
 
 	mu      sync.Mutex
 	buffers map[string]*imageBuffer // keyed by albumID / message key
@@ -30,9 +35,10 @@ type imageBuffer struct {
 	timer   *time.Timer
 }
 
-func NewHandler(ch *amqp.Channel) *Handler {
+func NewHandler(ch *amqp.Channel, cfg config.App) *Handler {
 	return &Handler{
 		Channel: ch,
+		Cfg:     cfg,
 		buffers: make(map[string]*imageBuffer),
 	}
 }
@@ -40,6 +46,31 @@ func NewHandler(ch *amqp.Channel) *Handler {
 func (h *Handler) Register(b *tb.Bot) {
 	b.Handle(tb.OnPhoto, h.onPhoto)
 	b.Handle(tb.OnDocument, h.onDocument)
+	b.Handle("/refresh", h.onRefresh)
+}
+
+func (h *Handler) onRefresh(c tb.Context) error {
+	url := strings.TrimSpace(h.Cfg.PublicUiDeployHookUrl)
+	if url == "" {
+		log.Printf("refresh requested but no deploy hook URL configured")
+		return c.Reply("No deploy hook URL is configured.")
+	}
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, nil)
+	if err != nil {
+		log.Printf("refresh: failed to build request: %v", err)
+		return c.Reply("Failed to trigger refresh.")
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Printf("refresh: deploy hook request failed: %v", err)
+		return c.Reply("Failed to trigger refresh.")
+	}
+	defer resp.Body.Close()
+
+	log.Printf("refresh: deploy hook responded with status %s", resp.Status)
+	return c.Reply("Refresh triggered ✅")
 }
 
 func (h *Handler) onPhoto(c tb.Context) error {

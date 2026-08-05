@@ -7,12 +7,14 @@ import (
 
 type App struct {
 	TelegramToken string
+	PublicUiDeployHookUrl string
 	RabbitMQ      rabbitmq.Config
 }
 
 func Load() App {
 	return App{
 		TelegramToken: requireEnv("TELEGRAM_BOT_TOKEN"),
+		PublicUiDeployHookUrl: os.Getenv("PUBLIC_UI_DEPLOY_HOOK_URL"),
 		RabbitMQ:      rabbitmq.ConfigFromEnv(),
 	}
 }

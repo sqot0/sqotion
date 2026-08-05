@@ -41,7 +41,7 @@ func Run() {
 		log.Fatalf("failed to declare topology: %v", err)
 	}
 
-	handler := bot.NewHandler(ch)
+	handler := bot.NewHandler(ch, cfg)
 	handler.Register(botInstance)
 
 	if _, err := rabbitmq.ConsumeResults(ch, func(msg rabbitmq.NotesResultMessage) {
