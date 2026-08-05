@@ -32,9 +32,7 @@ const R2_PUBLIC_ASSETS_URL = "https://sqotion-storage.sqot0.my.id";
 
 // Optional storage folder prefix (e.g. "notes") that wraps all keys in the
 // bucket. Notes live at "{prefix}/..."..
-const STORAGE_PREFIX = (
-	import.meta.env.S3_PREFIX ?? ""
-).replace(/^\/+|\/+$/g, "");
+const STORAGE_PREFIX = (env.S3_PREFIX ?? "").replace(/^\/+|\/+$/g, "");
 const STORAGE_PREFIX_DIR = STORAGE_PREFIX ? STORAGE_PREFIX + "/" : "";
 
 const md = new MarkdownIt({
@@ -67,7 +65,10 @@ md.renderer.rules.image = (tokens, idx, options, _env, self) => {
 	const srcIndex = token.attrIndex("src");
 	if (srcIndex >= 0) {
 		const [name, value] = token.attrs![srcIndex];
-		token.attrs![srcIndex] = [name, `${R2_PUBLIC_ASSETS_URL}/${STORAGE_PREFIX_DIR}${value}`];
+		token.attrs![srcIndex] = [
+			name,
+			`${R2_PUBLIC_ASSETS_URL}/${STORAGE_PREFIX_DIR}${value}`,
+		];
 	}
 	return defaultImageRenderer(tokens, idx, options, _env, self);
 };

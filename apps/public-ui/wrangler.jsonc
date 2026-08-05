@@ -17,5 +17,8 @@
 			"bucket_name": "sqotion",
 			"remote": true
 		}
-	]
+	],
+	"vars": {
+		"S3_PREFIX": "notes"
+	}
 }
