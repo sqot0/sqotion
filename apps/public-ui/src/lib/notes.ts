@@ -123,14 +123,14 @@ async function parseNote(key: string, object: R2ObjectBody): Promise<Note> {
 }
 
 function isMdKey(key: string): boolean {
-	const segments = key.slice(STORAGE_PREFIX_DIR.length).split("/");
+	const rel = key.slice(STORAGE_PREFIX_DIR.length);
+	const firstSegment = rel.split("/")[0] ?? "";
 	// Ignore the Assets folder entirely.
-	if (segments[0]?.toLowerCase() === "assets") {
+	if (firstSegment.toLowerCase() === "assets") {
 		return false;
 	}
-	// A key is a note (file) when any path segment contains a dot,
-	// e.g. "math/algebra.md". Bare folders have no dot segment.
-	return segments.some((segment) => segment.includes("."));
+	// Only Markdown files are notes. Everything else (images, etc.) is ignored.
+	return rel.endsWith(".md");
 }
 
 async function listObjects(folderPath?: string): Promise<R2ObjectBody[]> {
@@ -215,7 +215,10 @@ export function buildSubjectTree(notes: Note[]): SubjectNode[] {
 	const byPath = new Map<string, SubjectNode>();
 
 	for (const note of notes) {
-		const segments = note.id.split("/").filter(Boolean);
+		const relId = note.id.startsWith(STORAGE_PREFIX_DIR)
+			? note.id.slice(STORAGE_PREFIX_DIR.length)
+			: note.id;
+		const segments = relId.split("/").filter(Boolean);
 		let current: SubjectNode | undefined;
 		let prefix = "";
 
