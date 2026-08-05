@@ -31,9 +31,9 @@ export interface SubjectNode {
 const R2_PUBLIC_ASSETS_URL = "https://sqotion-storage.sqot0.my.id";
 
 // Optional storage folder prefix (e.g. "notes") that wraps all keys in the
-// bucket. Notes live at "{prefix}/...". Set via PUBLIC_STORAGE_PREFIX.
+// bucket. Notes live at "{prefix}/..."..
 const STORAGE_PREFIX = (
-	import.meta.env.PUBLIC_STORAGE_PREFIX ?? ""
+	import.meta.env.S3_PREFIX ?? ""
 ).replace(/^\/+|\/+$/g, "");
 const STORAGE_PREFIX_DIR = STORAGE_PREFIX ? STORAGE_PREFIX + "/" : "";
 
