@@ -53,7 +53,7 @@ def save_note(
             s3.put_object(Bucket=bucket, Key=img_key, Body=resp.content)
             print(f"  Uploaded attachment: s3://{bucket}/{img_key}", flush=True)
 
-            image_refs.append(f"![Image {i + 1}]({img_key})")
+            image_refs.append(f"![Image {i + 1}]({f"assets/{filename}"})")
         except Exception as e:
             print(f"  Failed to upload attachment from {url}: {e}", flush=True)
 

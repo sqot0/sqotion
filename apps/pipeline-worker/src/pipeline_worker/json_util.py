@@ -1,16 +1,8 @@
-"""Utilities for safely parsing JSON produced by an LLM."""
-
 import json
 from typing import Any
 
 
 def extract_json(text: str | None) -> dict[str, Any] | None:
-    """Robustly parse a JSON object from an LLM response.
-
-    Handles stray prose, Markdown code fences and leading/trailing text by
-    locating the outermost pair of braces and parsing just that substring.
-    Returns ``None`` when no valid JSON object can be extracted.
-    """
     if not text:
         return None
 
@@ -29,5 +21,6 @@ def extract_json(text: str | None) -> dict[str, Any] | None:
     candidate = text[start : end + 1]
     try:
         return json.loads(candidate)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        print(f"{e.msg} at line {e.lineno}, column {e.colno}")
         return None

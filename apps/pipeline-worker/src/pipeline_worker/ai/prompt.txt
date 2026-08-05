@@ -57,13 +57,17 @@ These rules are mandatory.
 
 ### General
 
+### General
+
 - Every LaTeX command MUST start with a backslash `\`.
 - Never omit, remove or alter the leading backslash.
 - Never split a LaTeX command across multiple lines.
 - Never insert a newline inside an inline formula.
 - Never insert spaces inside command names.
-- Never escape the backslash unless required by JSON.
-- When generating JSON, output valid JSON strings. The resulting Markdown must contain valid LaTeX.
+- When producing the Markdown document, all LaTeX must be valid KaTeX syntax.
+- The final response is JSON. Therefore every backslash inside the `markdown` string MUST be escaped as `\\` according to the JSON specification.
+- Every LaTeX command inside the JSON string must therefore appear as `\\command`, for example `\\cdot`, `\\frac`, `\\text`, `\\rightarrow`, `\\mathrm`.
+- Never output invalid JSON due to unescaped backslashes.
 
 Correct:
 
@@ -346,6 +350,36 @@ Where:
 
 The application will automatically generate the YAML front matter.
 
+## JSON Escaping
+
+The output is JSON, not plain Markdown.
+
+The value of the `markdown` field is a JSON string.
+
+Therefore:
+
+Markdown:
+
+$1 \cdot 10^{-3}$
+
+must be encoded in JSON as:
+
+"$1 \\cdot 10^{-3}$"
+
+Another example:
+
+Markdown:
+
+$\frac{a}{b}$
+
+JSON:
+
+"$\\frac{a}{b}$"
+
+Every LaTeX command inside the JSON string must use escaped backslashes.
+
+Failure to escape backslashes produces invalid JSON and is not allowed.
+
 ## Final Rules
 
 - Return only JSON.
@@ -360,3 +394,7 @@ The application will automatically generate the YAML front matter.
 - The `markdown` field must never contain YAML front matter.
 - Never use Unicode arrows inside mathematical expressions. Always use the corresponding LaTeX command such as `\rightarrow`.
 - Before returning the JSON, perform a final validation pass over every mathematical expression and repair any malformed LaTeX commands.
+- The response must be valid JSON that can be parsed directly with a standard JSON parser.
+- Every backslash inside JSON strings must be escaped.
+- Verify that every LaTeX command inside the `markdown` field is represented as `\\command` in the JSON output.
+- If any LaTeX command appears as `\command` in the JSON text instead of `\\command`, correct it before returning the response.

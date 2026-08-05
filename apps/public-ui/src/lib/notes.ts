@@ -67,7 +67,7 @@ md.renderer.rules.image = (tokens, idx, options, _env, self) => {
 	const srcIndex = token.attrIndex("src");
 	if (srcIndex >= 0) {
 		const [name, value] = token.attrs![srcIndex];
-		token.attrs![srcIndex] = [name, `${R2_PUBLIC_ASSETS_URL}/${value}`];
+		token.attrs![srcIndex] = [name, `${R2_PUBLIC_ASSETS_URL}/${STORAGE_PREFIX_DIR}${value}`];
 	}
 	return defaultImageRenderer(tokens, idx, options, _env, self);
 };
